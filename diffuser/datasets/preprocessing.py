@@ -101,39 +101,6 @@ def maze2d_set_terminals(env):
     return _fn
 
 
-def antmaze_set_terminals(env):
-    env = load_environment(env) if type(env) == str else env
-
-    goal = env.target_goal
-    threshold = 0.5
-
-    def _fn(dataset):
-        timeouts = dataset["timeouts"]
-        xy = dataset["observations"][:, :2]
-        distances = np.linalg.norm(xy - goal, axis=-1)
-        pass_goal = (distances <= threshold).astype(np.float32)
-
-        ## timeout at time t iff
-        ##      at goal at time t and
-        ##      not at goal at time t + 1
-        N = dataset["timeouts"].shape[0]
-        valid_epi = N // 1001
-        timeouts = np.zeros((N,))
-        timeouts[: valid_epi * 1001].reshape(-1, 1001)[:, -1] = 1
-        dataset["timeouts"] = timeouts
-
-        print(
-            f"[ utils/preprocessing ] Segmented {env.name} | {sum(pass_goal)} states passing goal states"
-        )
-
-        dataset["timeouts"] = timeouts
-        dataset["terminals"] = np.zeros_like(dataset["terminals"])
-        dataset["pass_goal"] = pass_goal
-        return dataset
-
-    return _fn
-
-
 # -------------------------- block-stacking --------------------------#
 
 

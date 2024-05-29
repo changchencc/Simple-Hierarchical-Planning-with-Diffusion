@@ -83,21 +83,7 @@ class SequenceDataset(torch.utils.data.Dataset):
                 max_start = min(max_start, path_length - horizon)
             for start in range(max_start):
                 end = start + horizon
-                start_obs = self.fields.observations[i, start][:2]
-                end_obs = self.fields.observations[i, end][:2]
-                dist = np.linalg.norm(start_obs - end_obs)
-                if "antmaze" in self.env_name:
-                    dist_thre = 0.35 * (horizon // self.jump) if self.jump > 1 else 0.5
-                else:
-                    dist_thre = 0
                 indices.append((i, start, end))
-                if dist > dist_thre:
-                    if self.fields.priority[i] != 2:
-                        repeat = 2
-                    else:
-                        repeat = 3
-                    for _ in range(repeat):
-                        indices.append((i, start, end))
 
         indices = np.array(indices)
         return indices

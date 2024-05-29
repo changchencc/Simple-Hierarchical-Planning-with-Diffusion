@@ -8,7 +8,7 @@ Abstract: Diffusion-based generative methods have proven effective in modeling t
 
 ```
 conda env create -f environment.yml
-conda activate diffusion
+conda activate hier_diffusion
 pip install -e .
 ```
 
