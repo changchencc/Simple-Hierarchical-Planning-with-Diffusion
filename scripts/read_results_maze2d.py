@@ -36,8 +36,7 @@ def load_results(paths):
         suffix = path.split("/")[-1]
         # print(suffix, path, score)
 
-    num_ = 500
-    scores = scores[:num_]
+    num_ = len(scores)
     if len(scores) > 0:
         if len(scores) > 100:
             scores = np.stack(
@@ -50,11 +49,9 @@ def load_results(paths):
                 [np.array(returns)[idx : idx + 100] for idx in range(num_ - 100)]
             )
             returns = returns[idx]
-            sus_rate = np.mean(returns >= 1)
         else:
             mean = np.mean(scores)
             returns = np.array(returns)
-            sus_rate = np.mean(returns >= 1)
     else:
         mean = np.nan
         sus_rate = np.nan
@@ -100,23 +97,18 @@ if __name__ == "__main__":
         for dataset in [args.dataset] if args.dataset else DATASETS:
             subdir = "/" + os.path.join(*args.savepath.split("/")[:-1])
 
-            for hl in [False, True]:
-                for e in epochs:
-                    reldir = subdir.split("/")[-1]
-                    paths = glob.glob(
-                        os.path.join(subdir, TRIAL, f"e{e}*hl{hl}_rollout.json")
-                    )
-                    paths = sorted(paths)
+            reldir = subdir.split("/")[-1]
+            paths = glob.glob(os.path.join(subdir, TRIAL, f"*_rollout.json"))
+            paths = sorted(paths)
 
-                    mean, err, scores, sus_rate = load_results(paths)
-                    if np.isnan(mean):
-                        continue
-                    path, name = os.path.split(subdir)
-                    name = name + f"_e{e}_hl{hl}"
-                    print(
-                        f"{dataset.ljust(30)} | {name.ljust(50)} | {path.ljust(50)} | {len(scores)} scores \n    {mean:.1f} +/- {err:.2f}"
-                        f"\nsus_rate: {sus_rate * 100:.2f}"
-                    )
-                    if verbose:
-                        print(scores)
-                        print(sus_rate)
+            mean, err, scores, sus_rate = load_results(paths)
+            if np.isnan(mean):
+                continue
+            path, name = os.path.split(subdir)
+            print(
+                f"{dataset.ljust(30)} | {name.ljust(50)} | {path.ljust(50)} | {len(scores)} scores \n    {mean:.1f} +/- {err:.2f}"
+                f"\nsus_rate: {sus_rate * 100:.2f}"
+            )
+            if verbose:
+                print(scores)
+                print(sus_rate)
