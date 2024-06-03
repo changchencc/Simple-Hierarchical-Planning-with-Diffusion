@@ -50,7 +50,7 @@ class SequenceDataset(torch.utils.data.Dataset):
         self.normalizer = DatasetNormalizer(
             fields, normalizer, path_lengths=fields["path_lengths"]
         )
-        self.indices = self.make_indices(fields.path_lengths, fields.priority, horizon)
+        self.indices = self.make_indices(fields.path_lengths, horizon)
 
         self.observation_dim = fields.observations.shape[-1]
         self.action_dim = fields.actions.shape[-1]
@@ -71,7 +71,7 @@ class SequenceDataset(torch.utils.data.Dataset):
                 self.n_episodes, self.max_path_length, -1
             )
 
-    def make_indices(self, path_lengths, priority, horizon):
+    def make_indices(self, path_lengths, horizon):
         """
         makes indices for sampling from dataset;
         each index maps to a datapoint

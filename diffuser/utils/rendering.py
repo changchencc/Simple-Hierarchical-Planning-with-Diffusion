@@ -314,34 +314,15 @@ MAZE_BOUNDS = {
     "maze2d-umaze-v1": (0, 5, 0, 5),
     "maze2d-medium-v1": (0, 8, 0, 8),
     "maze2d-large-v1": (0, 9, 0, 12),
-    "antmaze-umaze-diverse-v0": (0, 5, 0, 5),
-    "antmaze-medium-diverse-v0": (0, 8, 0, 8),
-    "antmaze-large-diverse-v0": (0, 12, 0, 9),
 }
 
 
 class MazeRenderer:
     def __init__(self, env):
         if type(env) is str:
-            if self.env_name in [
-                "antmaze-umaze-diverse-v0",
-                "antmaze-medium-diverse-v0",
-                "antmaze-large-diverse-v0",
-            ]:
-                self.env = load_environment(env)
-                maze_map = self.env.unwrapped._np_maze_map
-                if "large" in self.env_name:
-                    maze_map[7, 9] = 0  # large maze
-                if "medium" in self.env_name:
-                    maze_map[6, 6] = 0  # large maze
-                if "umaze" in self.env_name:
-                    maze_map[3, 1] = 0  # large maze
-                maze_map = maze_map.transpose(1, 0)
-                self._background = maze_map == 1
-            else:
-                env = load_environment(env)
-                self._config = env._config
-                self._background = self._config != " "
+            env = load_environment(env)
+            self._config = env._config
+            self._background = self._config != " "
         self._remove_margins = False
         self._extent = (0, 1, 1, 0)
 
@@ -392,24 +373,8 @@ class MazeRenderer:
 class Maze2dRenderer(MazeRenderer):
     def __init__(self, env, observation_dim=None):
         self.env_name = env
-        if self.env_name in [
-            "antmaze-umaze-diverse-v0",
-            "antmaze-medium-diverse-v0",
-            "antmaze-large-diverse-v0",
-        ]:
-            self.env = load_environment(env)
-            maze_map = self.env.unwrapped._np_maze_map
-            if "large" in self.env_name:
-                maze_map[7, 9] = 0  # large maze
-            if "medium" in self.env_name:
-                maze_map[6, 6] = 0  # large maze
-            if "umaze" in self.env_name:
-                maze_map[3, 1] = 0  # large maze
-            maze_map = maze_map.transpose(1, 0)
-            self._background = maze_map == 1
-        else:
-            self.env = load_environment(env)
-            self._background = self.env.maze_arr == 10
+        self.env = load_environment(env)
+        self._background = self.env.maze_arr == 10
         self.observation_dim = np.prod(self.env.observation_space.shape)
         self.action_dim = np.prod(self.env.action_space.shape)
         self.goal = None
@@ -419,8 +384,6 @@ class Maze2dRenderer(MazeRenderer):
     def renders(self, observations, conditions=None, **kwargs):
         bounds = MAZE_BOUNDS[self.env_name]
 
-        if "antmaze" in self.env_name:
-            observations = observations / 4 + 1
         observations = observations + 0.5
         if len(bounds) == 2:
             _, scale = bounds
@@ -435,54 +398,6 @@ class Maze2dRenderer(MazeRenderer):
         if conditions is not None:
             conditions /= scale
         return super().renders(observations, conditions, **kwargs)
-
-
-class SinedataRenderer:
-    def __init__(self, env):
-        # if type(env) is str: env = load_environment(env)
-        # self._config = env._config
-        # self._background = self._config != ' '
-        self._remove_margins = False
-        # self._extent = (0, 1, 1, 0)
-
-    def renders(self, observations, conditions=None, title=None):
-        plt.clf()
-        fig = plt.gcf()
-        fig.set_size_inches(5, 5)
-        # plt.imshow(self._background * .5,
-        #     extent=self._extent, cmap=plt.cm.binary, vmin=0, vmax=1)
-
-        # colors = plt.cm.jet(np.linspace(0,1,path_length))
-        traj_len = observations.shape[0]
-        x = np.linspace(-pi, pi, traj_len)
-        plt.plot(x, observations[:, 0], zorder=10)
-        # plt.scatter(observations[:,1], observations[:,0], c=colors, zorder=20)
-        # plt.axis('off')
-        plt.title(title)
-        img = plot2img(fig, remove_margins=self._remove_margins)
-        return img
-
-    def composite(self, savepath, paths, ncol=5, **kwargs):
-        """
-        savepath : str
-        observations : [ n_paths x horizon x 2 ]
-        """
-        assert (
-            len(paths) % ncol == 0
-        ), "Number of paths must be divisible by number of columns"
-
-        images = []
-        for path, kw in zipkw(paths, **kwargs):
-            img = self.renders(*path, **kw)
-            images.append(img)
-        images = np.stack(images, axis=0)
-
-        nrow = len(images) // ncol
-        images = einops.rearrange(
-            images, "(nrow ncol) H W C -> (nrow H) (ncol W) C", nrow=nrow, ncol=ncol
-        )
-        imageio.imsave(savepath, images)
-        print(f"Saved {len(paths)} samples to: {savepath}")
 
 
 # -----------------------------------------------------------------------------#

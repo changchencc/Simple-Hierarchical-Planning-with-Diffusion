@@ -28,6 +28,7 @@ plan_args_to_watch = [
     ("jump", "J"),
 ]
 
+logbase = "logs"
 base = {
     "diffusion": {
         ## model
@@ -57,7 +58,7 @@ base = {
         "use_padding": False,
         "max_path_length": 40000,
         ## serialization
-        "logbase": "/common/users/cc1547/projects/diffuser/logs",
+        "logbase": logbase,
         "prefix": "diffusion/",
         "exp_name": watch(diffusion_args_to_watch),
         ## training
@@ -90,6 +91,7 @@ base = {
         "n_diffusion_steps": 128,
         "normalizer": "LimitsNormalizer",
         ## serialization
+        "logbase": logbase,
         "vis_freq": 10,
         "logbase": "/common/users/cc1547/projects/diffuser/logs",
         "prefix": "plans/release",

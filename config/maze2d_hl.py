@@ -28,7 +28,7 @@ plan_args_to_watch = [
     ("jump", "J"),
 ]
 
-logbase = ("logs",)
+logbase = "logs"
 base = {
     "diffusion": {
         ## model

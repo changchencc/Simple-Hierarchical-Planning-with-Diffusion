@@ -28,8 +28,7 @@ class ReplayBuffer:
         termination_penalty,
     ):
         self._dict = {
-            "path_lengths": np.zeros(max_n_episodes, dtype=np.int),
-            "priority": np.ones(max_n_episodes, dtype=np.int),
+            "path_lengths": np.zeros(max_n_episodes, dtype=np.int32),
         }
         self._count = 0
         self.max_n_episodes = max_n_episodes
@@ -71,7 +70,7 @@ class ReplayBuffer:
 
     def items(self):
         return {
-            k: v for k, v in self._dict.items() if k not in ["path_lengths", "priority"]
+            k: v for k, v in self._dict.items() if k not in ["path_lengths"]
         }.items()
 
     def _allocate(self, key, array):
