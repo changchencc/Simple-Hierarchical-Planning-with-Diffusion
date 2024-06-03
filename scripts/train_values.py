@@ -43,7 +43,6 @@ render_config = utils.Config(
 )
 
 dataset = dataset_config()
-val_dataset = dataset_config(split="validation")
 renderer = render_config()
 
 observation_dim = dataset.observation_dim
@@ -67,7 +66,6 @@ model_config = utils.Config(
     dim_mults=args.dim_mults,
     kernel_size=args.kernel_size,
     attention=args.attention,
-    attn_jump=args.attn_jump,
     dk=args.dk,
     ds=args.ds,
     dp=args.dp,
@@ -110,15 +108,7 @@ model = model_config()
 
 diffusion = diffusion_config(model)
 
-trainer = trainer_config(diffusion, dataset, val_dataset, renderer)
-
-diffusion_experiment = utils.load_diffusion(
-    args.logbase, args.dataset, args.savepath, epoch="latest"
-)
-model = diffusion_experiment.model
-trainer = diffusion_experiment.trainer
-diffusion = diffusion_experiment.diffusion
-start_epoch = int(diffusion_experiment.epoch // args.n_steps_per_epoch)
+trainer = trainer_config(diffusion, dataset, renderer)
 
 # -----------------------------------------------------------------------------#
 # ------------------------ test forward & backward pass -----------------------#
@@ -138,6 +128,6 @@ print("✓")
 n_epochs = int(args.n_train_steps // args.n_steps_per_epoch)
 train_writer = SummaryWriter(log_dir=args.savepath + "-train")
 
-for i in range(start_epoch, n_epochs):
+for i in range(n_epochs):
     print(f"Epoch {i} / {n_epochs} | {args.savepath}")
     trainer.train(n_train_steps=args.n_steps_per_epoch, writer=train_writer)

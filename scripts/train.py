@@ -64,7 +64,6 @@ model_config = utils.Config(
     cond_dim=observation_dim,
     dim_mults=args.dim_mults,
     attention=args.attention,
-    attn_jump=args.attn_jump,
     kernel_size=args.kernel_size,
     dim=args.dim,
     dk=args.dk,
